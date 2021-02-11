@@ -9,9 +9,9 @@ require('dotenv').config()
 const accountSid = process.env.ACCOUNT_SID; 
 const authToken = process.env.AUTH_TOKEN; 
 const messageSid = process.env.MESSAGE_SID;
-const number = process.env.MESSAGE_SID;
+const number = process.env.NUMBER;
 
-const client = require('twilio')(accountSid, authToken); 
+const client = require('twilio')(accountSid, authToken);
 
 class Impfbot {
   private config = getConfig();
@@ -163,7 +163,7 @@ class Impfbot {
   };
 
   private alertSms = async (phoneNumber: string, message: string, priority: number) => {
-    if (this.config.pushover.token && this.config.pushover.user) {
+    if (phoneNumber) {
       try {
         client.messages 
         .create({         
@@ -171,7 +171,7 @@ class Impfbot {
            body: message + " - Priority: " + priority,
            messagingServiceSid: messageSid
          })
-        .then((message: any) => console.log(message.sid)) 
+        .then((message: any) => console.log('SmS to ' + phoneNumber)) 
         .done();
       } catch (error) {
         console.error("Error when pushing to pushover, will retry.");
@@ -206,8 +206,7 @@ class Impfbot {
       if (
         (this.lastAppointmentsAvailable[url] ?? 0) === 0 &&
         appointmentsAvailable > 0
-      ) {
-        
+      ) {     
         if (number) {
           this.alertSms(
             number,
@@ -257,4 +256,3 @@ function awaitTimeout(ms: number) {
 
 const impfbot = new Impfbot();
 impfbot.boot();
-
